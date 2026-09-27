@@ -1,0 +1,2639 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ElectroField EDU</title>
+<link rel="icon" type="image/svg+xml" href="electro.svg">
+<style>
+/* ============================================================
+   ════════════════════════════════════════════════════════════
+   1. INTRO CSS
+   ════════════════════════════════════════════════════════════
+   ============================================================ */
+:root{
+  --bg:#080c14; --bone:#f4efe6; --cyan:#5eead4; --rose:#f43f5e;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:var(--bg);overflow:hidden}
+body{
+  font-family:"Inter","SF Pro Display","Segoe UI",system-ui,-apple-system,sans-serif;
+  color:var(--bone); -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- Canvas del intro ---------- */
+#introCanvas{
+  position:fixed; inset:0; z-index:50;
+  display:block; width:100%; height:100%;
+  opacity:1; transition:opacity .7s cubic-bezier(.4,0,.2,1);
+}
+#introCanvas.gone{opacity:0; pointer-events:none}
+
+/* ══════════════════════════════════════════════════════════════════
+   BOTÓN "GET STARTED"
+   ══════════════════════════════════════════════════════════════════ */
+#getStarted{
+  position:fixed;
+  left:50%;
+  bottom:16%;
+  z-index:60;
+
+  opacity:0;
+  transform:translate(-50%, 22px) scale(.9);
+  pointer-events:none;
+
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px 44px;
+  border-radius:999px;
+  background:transparent;
+  border:1px solid rgba(94, 234, 212, .55);
+  color:var(--bone);
+
+  font-family:inherit;
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:.30em;
+  text-transform:uppercase;
+  line-height:1;
+  white-space:nowrap;
+  cursor:pointer;
+  outline:none;
+  -webkit-tap-highlight-color:transparent;
+
+  box-shadow:
+    0 0 0 0 rgba(94, 234, 212, 0),
+    inset 0 0 0 0 rgba(94, 234, 212, 0);
+
+  transition:
+    opacity   .85s cubic-bezier(.2, .8, .2, 1),
+    transform .85s cubic-bezier(.2, .8, .2, 1),
+    box-shadow .45s ease,
+    background .35s ease,
+    border-color .35s ease,
+    color .35s ease;
+
+  will-change:transform, opacity, box-shadow;
+}
+
+#getStarted.show{
+  opacity:1;
+  transform:translate(-50%, 0) scale(1);
+  pointer-events:auto;
+  box-shadow:
+    0 0 42px rgba(94, 234, 212, .28),
+    0 0 90px rgba(94, 234, 212, .12),
+    inset 0 0 22px rgba(94, 234, 212, .06);
+  animation:btnBreathe 3.4s ease-in-out 1.1s infinite;
+}
+
+@keyframes btnBreathe{
+  0%, 100%{
+    box-shadow:
+      0 0 42px rgba(94, 234, 212, .28),
+      0 0 90px rgba(94, 234, 212, .12),
+      inset 0 0 22px rgba(94, 234, 212, .06);
+  }
+  50%{
+    box-shadow:
+      0 0 58px rgba(94, 234, 212, .42),
+      0 0 130px rgba(94, 234, 212, .18),
+      inset 0 0 26px rgba(94, 234, 212, .10);
+  }
+}
+
+#getStarted:hover,
+#getStarted:focus-visible{
+  background:rgba(94, 234, 212, .10);
+  border-color:var(--cyan);
+  color:var(--cyan);
+  box-shadow:
+    0 0 60px rgba(94, 234, 212, .50),
+    0 0 140px rgba(94, 234, 212, .22),
+    inset 0 0 30px rgba(94, 234, 212, .14);
+}
+
+#getStarted:active{
+  transform:translate(-50%, 0) scale(.97);
+  transition-duration:.15s;
+}
+
+#getStarted::before{
+  content:'';
+  position:absolute;
+  inset:-1px;
+  border-radius:inherit;
+  border:1px solid rgba(94, 234, 212, .65);
+  opacity:0;
+  pointer-events:none;
+}
+#getStarted.show::before{
+  animation:ringPulse 2.6s ease-out 1.6s infinite;
+}
+@keyframes ringPulse{
+  0%{
+    opacity:.65;
+    transform:scale(1);
+  }
+  70%{
+    opacity:0;
+    transform:scale(1.18);
+  }
+  100%{
+    opacity:0;
+    transform:scale(1.18);
+  }
+}
+
+@media (max-width:420px){
+  #getStarted{
+    padding:16px 34px;
+    font-size:13px;
+    letter-spacing:.24em;
+    bottom:14%;
+  }
+}
+
+/* ============================================================
+   ════════════════════════════════════════════════════════════
+   2. APP CSS (styles.css)
+   ════════════════════════════════════════════════════════════
+   ============================================================ */
+:root {
+  --bone-90: rgba(244, 239, 230, 0.90);
+  --bone-70: rgba(244, 239, 230, 0.70);
+  --bone-50: rgba(244, 239, 230, 0.50);
+  --bone-30: rgba(244, 239, 230, 0.30);
+  --bone-15: rgba(244, 239, 230, 0.15);
+  --bone-08: rgba(244, 239, 230, 0.08);
+  --bone-04: rgba(244, 239, 230, 0.04);
+
+  --cyan-40: rgba(94, 234, 212, 0.40);
+  --cyan-15: rgba(94, 234, 212, 0.15);
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
+  --font-mono: 'SF Mono', Menlo, Consolas, monospace;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--bone);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 340px 1fr;
+}
+
+/* ============ SIDEBAR ============ */
+aside.panel {
+  background: linear-gradient(180deg, #0b1018 0%, #080c14 100%);
+  border-right: 1px solid var(--bone-08);
+  padding: 26px 22px 40px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+aside.panel::-webkit-scrollbar { width: 6px; }
+aside.panel::-webkit-scrollbar-thumb { background: var(--bone-15); border-radius: 3px; }
+aside.panel::-webkit-scrollbar-track { background: transparent; }
+
+/* ============ BRAND ============ */
+.brand { margin-bottom: 22px; }
+.brand h1 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: 26px;
+  letter-spacing: -0.4px;
+  line-height: 1.1;
+  color: var(--bone);
+}
+.brand h1 span {
+  color: var(--cyan);
+  font-style: italic;
+  margin-left: 4px;
+}
+.brand p {
+  margin: 8px 0 0;
+  color: var(--bone-50);
+  font-size: 12px;
+  line-height: 1.55;
+  letter-spacing: 0.2px;
+}
+.badge {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 5px 10px;
+  border-radius: 100px;
+  background: var(--cyan-15);
+  color: var(--cyan);
+  border: 1px solid var(--cyan-40);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+
+/* ============ CARDS ============ */
+.card {
+  margin-top: 14px;
+  padding: 18px 16px;
+  background: var(--bone-04);
+  border: 1px solid var(--bone-08);
+  border-radius: var(--radius);
+}
+.card h2 {
+  margin: 0 0 14px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--bone-50);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card h2 span {
+  font-family: var(--font-mono);
+  color: var(--cyan);
+  opacity: 0.7;
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+
+/* ============ GRID / BOTONES ============ */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+button.btn {
+  border: 1px solid var(--bone-15);
+  background: transparent;
+  color: var(--bone-90);
+  border-radius: var(--radius-sm);
+  padding: 10px 8px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+button.btn:hover {
+  background: var(--bone-08);
+  border-color: var(--bone-30);
+}
+button.btn.active {
+  background: var(--bone-90);
+  color: var(--bg);
+  border-color: var(--bone);
+  font-weight: 600;
+}
+button.btn.pos { color: var(--rose); }
+button.btn.pos.active {
+  background: var(--rose);
+  color: var(--bone);
+  border-color: var(--rose);
+}
+button.btn.neg { color: var(--cyan); }
+button.btn.neg.active {
+  background: var(--cyan);
+  color: var(--bg);
+  border-color: var(--cyan);
+}
+button.btn.probe { color: var(--bone); }
+button.btn.probe.active {
+  background: var(--bone);
+  color: var(--bg);
+  border-color: var(--bone);
+}
+button.btn.accent { color: var(--cyan); }
+button.btn.accent:hover {
+  background: var(--cyan-15);
+  border-color: var(--cyan-40);
+}
+button.btn.warn { color: var(--bone-70); }
+button.btn.dark { color: var(--bone-70); }
+
+/* ============ SLIDERS ============ */
+.slider-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 11px;
+  color: var(--bone-50);
+  letter-spacing: 0.3px;
+  margin: 14px 0 8px;
+}
+.slider-label b {
+  color: var(--bone);
+  font-weight: 500;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2px;
+  background: var(--bone-15);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  background: var(--bone);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+input[type=range]::-moz-range-thumb {
+  width: 14px; height: 14px;
+  background: var(--bone);
+  border-radius: 50%; border: 0;
+  cursor: pointer;
+}
+
+/* ============ TOGGLES ============ */
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 11.5px;
+  color: var(--bone-70);
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--bone-04);
+}
+.toggle:last-of-type { border-bottom: 0; }
+.toggle input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 32px; height: 18px;
+  background: var(--bone-15);
+  border-radius: 100px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  outline: none;
+}
+.toggle input::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--bone);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.toggle input:checked { background: var(--cyan-40); }
+.toggle input:checked::after {
+  transform: translateX(14px);
+  background: var(--cyan);
+}
+
+/* ============ KPIs ============ */
+.kpis {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.kpi {
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bone-04);
+  border: 1px solid var(--bone-08);
+}
+.kpi span {
+  display: block;
+  color: var(--bone-50);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+.kpi strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--bone);
+  font-family: var(--font-mono);
+}
+
+/* ============ HINTS ============ */
+.hint {
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: var(--bone-50);
+  margin: 10px 0 0;
+  letter-spacing: 0.2px;
+}
+
+/* ============ STAGE ============ */
+main#stage {
+  position: relative;
+  min-width: 0;
+  background: radial-gradient(ellipse at 50% 40%, #0d1220 0%, #080c14 55%, #05070d 100%);
+  overflow: hidden;
+}
+#canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+.topbar {
+  position: absolute;
+  top: 18px; left: 50%;
+  transform: translateX(-50%);
+  background: rgba(8, 12, 20, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 9px 16px;
+  border: 1px solid var(--bone-08);
+  border-radius: 100px;
+  font-size: 11px;
+  color: var(--bone-70);
+  letter-spacing: 0.3px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.legend {
+  position: absolute;
+  right: 18px; bottom: 18px;
+  background: rgba(8, 12, 20, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--bone-08);
+  font-size: 10px;
+  color: var(--bone-50);
+  letter-spacing: 0.5px;
+  display: flex;
+  gap: 14px;
+}
+.legend > span { display: flex; align-items: center; gap: 6px; }
+.legend .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.legend .dot.pos { background: var(--rose); }
+.legend .dot.neg { background: var(--cyan); }
+.legend .dot.probe { background: var(--bone); }
+
+.hud {
+  position: absolute;
+  left: 18px; bottom: 18px;
+  background: rgba(8, 12, 20, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--bone-08);
+  font-size: 10px;
+  color: var(--bone-50);
+  font-family: var(--font-mono);
+  letter-spacing: 0.5px;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 860px) {
+  #app { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  aside.panel {
+    max-height: 340px;
+    border-right: 0;
+    border-bottom: 1px solid var(--bone-08);
+    padding: 16px;
+  }
+  .brand h1 { font-size: 22px; }
+}
+
+/* ============================================================
+   ════════════════════════════════════════════════════════════
+   3. TRANSICIÓN INTRO → APP
+   ════════════════════════════════════════════════════════════
+   ============================================================ */
+#intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--bg);
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity   .85s cubic-bezier(.4, 0, .2, 1),
+    transform .85s cubic-bezier(.4, 0, .2, 1);
+  will-change: opacity, transform;
+}
+#intro.hidden {
+  opacity: 0;
+  transform: scale(1.06);
+  pointer-events: none;
+}
+
+#app {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .9s cubic-bezier(.4, 0, .2, 1) .15s;
+  will-change: opacity;
+}
+#app.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════
+     INTRO (overlay)
+     ════════════════════════════════════════════════════════════ -->
+<div id="intro">
+  <canvas id="introCanvas" aria-hidden="true"></canvas>
+  <button id="getStarted" type="button">Get Started</button>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     APP PRINCIPAL
+     ════════════════════════════════════════════════════════════ -->
+<div id="app">
+  <aside class="panel">
+    <header class="brand">
+      <h1>ElectroField<span>EDU</span></h1>
+      <p>Laboratorio interactivo de campo eléctrico</p>
+      <span class="badge">HTML · CSS · JS</span>
+    </header>
+
+    <section class="card">
+      <h2><span>01</span> Herramienta</h2>
+      <div class="grid-2">
+        <button id="posBtn" class="btn pos active">＋ Positiva</button>
+        <button id="negBtn" class="btn neg">− Negativa</button>
+        <button id="probeBtn" class="btn probe">◎ Prueba</button>
+        <button id="deleteBtn" class="btn dark">⌫ Eliminar</button>
+      </div>
+      <label class="slider-label"><span>Valor de carga</span><b id="qLabel">1.0 nC</b></label>
+      <input id="qSlider" type="range" min="0.5" max="3" step="0.5" value="1">
+      <p class="hint">Clic para colocar · arrastra para mover</p>
+    </section>
+
+    <section class="card">
+      <h2><span>02</span> Visualización</h2>
+      <div class="toggle"><span>Vectores de campo</span><input id="vectorsToggle" type="checkbox" checked></div>
+      <div class="toggle"><span>Líneas de campo</span><input id="fieldLinesToggle" type="checkbox" checked></div>
+      <div class="toggle"><span>Mapa de potencial</span><input id="potentialToggle" type="checkbox" checked></div>
+      <div class="toggle"><span>Equipotenciales</span><input id="equiToggle" type="checkbox" checked></div>
+      <div class="toggle"><span>Partículas trazadoras</span><input id="particlesToggle" type="checkbox" checked></div>
+      <div class="toggle"><span>Cuadrícula</span><input id="gridToggle" type="checkbox"></div>
+      <label class="slider-label"><span>Densidad de vectores</span><b id="densityLabel">42 px</b></label>
+      <input id="densitySlider" type="range" min="28" max="70" step="2" value="42">
+      <label class="slider-label"><span>Intensidad visual</span><b id="strengthLabel">1.0×</b></label>
+      <input id="strengthSlider" type="range" min="0.4" max="2.4" step="0.1" value="1">
+    </section>
+
+    <section class="card">
+      <h2><span>03</span> Carga de prueba</h2>
+      <div class="grid-2">
+        <button id="probePlus" class="btn pos active">q prueba +</button>
+        <button id="probeMinus" class="btn neg">q prueba −</button>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><span>|E| N/C</span><strong id="eValue">—</strong></div>
+        <div class="kpi"><span>|F| N</span><strong id="fValue">—</strong></div>
+        <div class="kpi"><span>Dirección E</span><strong id="angleValue">—</strong></div>
+        <div class="kpi"><span>Potencial V</span><strong id="vValue">—</strong></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span>04</span> Configuraciones</h2>
+      <div class="grid-2">
+        <button id="dipoleBtn" class="btn accent">Dipolo</button>
+        <button id="sameBtn" class="btn accent">Iguales</button>
+        <button id="capacitorBtn" class="btn accent">Capacitor</button>
+        <button id="quadBtn" class="btn accent">Cuadrupolo</button>
+      </div>
+      <div class="grid-2" style="margin-top:8px">
+        <button id="pauseBtn" class="btn warn">Pausar</button>
+        <button id="clearBtn" class="btn dark">Limpiar</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span>05</span> Datos y juego</h2>
+      <div class="grid-2">
+        <button id="saveBtn" class="btn accent">Guardar</button>
+        <button id="loadBtn" class="btn accent">Cargar</button>
+        <button id="exportBtn" class="btn accent">Captura PNG</button>
+        <button id="importBtn" class="btn accent">Importar</button>
+      </div>
+      <div class="toggle" style="margin-top:10px"><span>Modo juego</span><input id="gameToggle" type="checkbox"></div>
+      <p class="hint" id="gameHint">Lleva la partícula al objetivo colocando cargas.</p>
+    </section>
+
+    <section class="card">
+      <h2><span>06</span> Unidades SI</h2>
+      <p class="hint">k = 8.99×10⁹ N·m²/C² · 1 nC = 10⁻⁹ C · escala 1 m = 60 px. Softening 0.15 m.</p>
+    </section>
+  </aside>
+
+  <main id="stage">
+    <canvas id="canvas"></canvas>
+    <div class="topbar" id="status">Herramienta: carga positiva · clic para colocar</div>
+    <div class="legend">
+      <span><i class="dot pos"></i>positiva</span>
+      <span><i class="dot neg"></i>negativa</span>
+      <span><i class="dot probe"></i>prueba</span>
+    </div>
+    <div class="hud" id="hud">1 m = 60 px</div>
+  </main>
+</div>
+
+<input type="file" id="fileInput" accept=".json" style="display:none">
+
+<script>
+/* ============================================================
+   ════════════════════════════════════════════════════════════
+   1. INTRO SCRIPT
+   ════════════════════════════════════════════════════════════
+   ============================================================ */
+(function(){
+'use strict';
+
+/* ══════════════════════════════════════════════════════════════════════
+   PALETA
+   ══════════════════════════════════════════════════════════════════════ */
+const BG   = [8, 12, 20];
+const BONE = [244, 239, 230];
+const CYAN = [94, 234, 212];
+const ROSE = [244, 63, 94];
+
+const rgba = (c, a) => 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')';
+const rgb  = c => 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
+
+/* ══════════════════════════════════════════════════════════════════════
+   UTILIDADES
+   ══════════════════════════════════════════════════════════════════════ */
+const TAU = Math.PI * 2;
+const clamp01 = v => v < 0 ? 0 : v > 1 ? 1 : v;
+const lerp = (a, b, t) => a + (b - a) * t;
+const seg  = (t, a, b) => clamp01((t - a) / (b - a));
+
+const ease = {
+  out2:  t => 1 - (1 - t) * (1 - t),
+  out3:  t => 1 - Math.pow(1 - t, 3),
+  out4:  t => 1 - Math.pow(1 - t, 4),
+  out5:  t => 1 - Math.pow(1 - t, 5),
+  in3:   t => t * t * t,
+  io3:   t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+  back:  t => { const c1 = 1.70158, c3 = c1 + 1;
+                return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2); }
+};
+
+/* ══════════════════════════════════════════════════════════════════════
+   TIMELINE
+   ══════════════════════════════════════════════════════════════════════ */
+const T = {
+  fadeIn:  [ 0.00,  0.90],
+  orbIn:   [ 0.45,  2.10],
+  split:   [ 1.75,  3.05],
+  lines:   [ 2.55,  4.20],
+  title:   [ 2.70,  4.40],
+  pulse:   [ 4.40,  4.70],
+  tracers: [ 3.80,  4.80],
+  total:    4.82
+};
+const DUR = T.total * 1000;
+
+/* El botón aparece 0.10 s después de que el título termina de formarse */
+const BTN_APPEAR_AT = T.title[1] + 0.10;   // = 4.50 s
+
+/* ══════════════════════════════════════════════════════════════════════
+   CANVAS
+   ══════════════════════════════════════════════════════════════════════ */
+const cv    = document.getElementById('introCanvas');
+const ctx   = cv.getContext('2d', { alpha: false });
+const btn   = document.getElementById('getStarted');
+
+let W = 0, H = 0, CX = 0, CY = 0, DPR = 1;
+
+let grainCv = null;
+let grainPattern = null;
+
+/* ─────── Sprites pre-renderizados ─────── */
+let glowBone = null;
+let glowCyan = null;
+
+/* ══════════════════════════════════════════════════════════════════════
+   ESTADO GLOBAL
+   ══════════════════════════════════════════════════════════════════════ */
+const DW = 300;
+let zStart = 1.9, zEnd = 1.0;
+
+let charges = [];
+let fieldLines = [];
+let lineLens = [];
+let tracers = [];
+let ripples = [];
+let dust = [];
+
+let titleParticles = [];
+let textReady = false;
+
+let running = false, ended = false;
+let t0 = 0, lastTs = 0, rafId = 0, elapsed = 0;
+let rippleTimer = 0;
+let grainOffset = 0;
+let btnShown = false;
+
+/* ══════════════════════════════════════════════════════════════════════
+   SPRITES
+   ══════════════════════════════════════════════════════════════════════ */
+function makeGlow(r, g, b, S){
+  S = S || 64;
+  const half = S / 2;
+  const c = document.createElement('canvas');
+  c.width = c.height = S;
+  const x = c.getContext('2d');
+  const grad = x.createRadialGradient(half, half, 0, half, half, half);
+  grad.addColorStop(0.00, 'rgba(' + r + ',' + g + ',' + b + ',1)');
+  grad.addColorStop(0.30, 'rgba(' + r + ',' + g + ',' + b + ',0.55)');
+  grad.addColorStop(0.62, 'rgba(' + r + ',' + g + ',' + b + ',0.16)');
+  grad.addColorStop(1.00, 'rgba(' + r + ',' + g + ',' + b + ',0)');
+  x.fillStyle = grad;
+  x.fillRect(0, 0, S, S);
+  return c;
+}
+
+function buildSprites(){
+  glowBone = makeGlow(244, 239, 230, 64);
+  glowCyan = makeGlow( 94, 234, 212, 64);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   RESIZE
+   ══════════════════════════════════════════════════════════════════════ */
+function resize(){
+  const iw = window.innerWidth;
+  const ih = window.innerHeight;
+
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const MAXPIX = 3.4e6;
+  if (iw * ih * dpr * dpr > MAXPIX) dpr = Math.sqrt(MAXPIX / (iw * ih));
+
+  DPR = dpr;
+  W = iw; H = ih; CX = W / 2; CY = H / 2;
+
+  cv.width  = Math.max(1, Math.round(W * DPR));
+  cv.height = Math.max(1, Math.round(H * DPR));
+  cv.style.width  = W + 'px';
+  cv.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+  buildGrain();
+  buildScene();
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   GRANO DE PELÍCULA
+   ══════════════════════════════════════════════════════════════════════ */
+function buildGrain(){
+  const s = 128;
+  grainCv = document.createElement('canvas');
+  grainCv.width = grainCv.height = s;
+  const g = grainCv.getContext('2d');
+  const img = g.createImageData(s, s);
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4){
+    const v = (Math.random() * 255) | 0;
+    d[i] = d[i+1] = d[i+2] = v;
+    d[i+3] = 22;
+  }
+  g.putImageData(img, 0, 0);
+  grainPattern = null;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ESCENA
+   ══════════════════════════════════════════════════════════════════════ */
+function buildScene(){
+  charges = [
+    { x: -DW, y: 0, q:  1, col: ROSE, sign: '+', scale: 1.15 },
+    { x:  DW, y: 0, q: -1, col: CYAN, sign: '−', scale: 1.00 }
+  ];
+
+  zEnd   = Math.min(1, (W * 0.36) / DW, (H * 0.52) / DW);
+  zEnd   = Math.max(zEnd, 0.42);
+  zStart = zEnd * 1.9;
+
+  traceFieldLines();
+  buildTracers();
+  buildDust();
+  buildTitle();
+}
+
+/* ------------------------------------------------ Campo eléctrico */
+function fieldAt(x, y){
+  let ex = 0, ey = 0;
+  for (let i = 0; i < charges.length; i++){
+    const c = charges[i];
+    const dx = x - c.x, dy = y - c.y;
+    let r2 = dx * dx + dy * dy;
+    if (r2 < 64) r2 = 64;
+    const k = c.q * 12000 / (r2 * Math.sqrt(r2));
+    ex += dx * k;
+    ey += dy * k;
+  }
+  return { x: ex, y: ey };
+}
+
+/* ------------------------------------------------ Líneas de campo */
+function traceFieldLines(){
+  fieldLines = [];
+  const STEP = 5;
+  const MAXS = 520;
+  const N = 18;
+
+  for (let ci = 0; ci < charges.length; ci++){
+    const c = charges[ci];
+    if (c.q <= 0) continue;
+
+    for (let i = 0; i < N; i++){
+      const a = (i / N) * TAU;
+      let x = c.x + Math.cos(a) * 10;
+      let y = c.y + Math.sin(a) * 10;
+      const pts = [{ x, y }];
+
+      for (let s = 0; s < MAXS; s++){
+        const e = fieldAt(x, y);
+        const m = Math.hypot(e.x, e.y);
+        if (m < 1e-7) break;
+
+        x += (e.x / m) * STEP;
+        y += (e.y / m) * STEP;
+        pts.push({ x, y });
+
+        let stop = false;
+        for (let j = 0; j < charges.length; j++){
+          const n = charges[j];
+          if (n.q < 0 && Math.hypot(x - n.x, y - n.y) < 12){ stop = true; break; }
+        }
+        if (stop) break;
+
+        if (Math.abs(x) > DW * 4.2 || Math.abs(y) > DW * 3.4) break;
+      }
+      if (pts.length > 6) fieldLines.push(pts);
+    }
+  }
+
+  lineLens = fieldLines.map(pts => {
+    const acc = new Float32Array(pts.length);
+    let L = 0;
+    for (let i = 1; i < pts.length; i++){
+      L += Math.hypot(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y);
+      acc[i] = L;
+    }
+    return { acc, total: L || 1 };
+  });
+}
+
+/* ------------------------------------------------ Trazadoras */
+function buildTracers(){
+  tracers = [];
+  const COUNT = Math.min(220, Math.round(W / 7));
+  for (let i = 0; i < COUNT; i++){
+    tracers.push(makeTracer(true));
+  }
+}
+function makeTracer(spread){
+  const li = (Math.random() * fieldLines.length) | 0;
+  return {
+    li,
+    u:    spread ? Math.random() : Math.random() * 0.15,
+    spd:  0.085 + Math.random() * 0.11,
+    w:    0.9 + Math.random() * 1.5,
+    cyan: Math.random() < 0.55,
+    flick:Math.random() * TAU
+  };
+}
+
+/* ------------------------------------------------ Polvo ambiental */
+function buildDust(){
+  dust = [];
+  const n = Math.min(160, Math.round((W * H) / 16000));
+  for (let i = 0; i < n; i++){
+    dust.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: 0.4 + Math.random() * 1.1,
+      a: 0.05 + Math.random() * 0.22,
+      vx: (Math.random() - 0.5) * 5,
+      vy: (Math.random() - 0.5) * 5,
+      ph: Math.random() * TAU
+    });
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   TÍTULO
+   ══════════════════════════════════════════════════════════════════════ */
+function buildTitle(){
+  titleParticles = [];
+  textReady = false;
+
+  const FAM = '"Inter","SF Pro Display","Segoe UI",system-ui,-apple-system,sans-serif';
+  const MAXW = Math.min(W * 0.86, 1500);
+
+  const m = document.createElement('canvas').getContext('2d');
+  m.textBaseline = 'middle';
+
+  let f1 = 400;
+  m.font = '900 ' + f1 + 'px ' + FAM;
+  const w1 = m.measureText('ElectroField').width || 1;
+  f1 *= MAXW / w1;
+  f1 = Math.max(30, Math.min(f1, H * 0.215));
+
+  m.font = '900 ' + f1 + 'px ' + FAM;
+  const wElectro = m.measureText('Electro').width;
+  const wTotal   = m.measureText('ElectroField').width;
+
+  let f2 = f1 * 0.36;
+  m.font = '800 ' + f2 + 'px ' + FAM;
+  const wEduBase = m.measureText('EDU').width || 1;
+  f2 *= Math.min(MAXW * 0.30, f2 * 4.6) / wEduBase;
+
+  const gap = f1 * 0.14;
+  const y1  = CY - f1 * 0.44;
+  const y2  = y1 + f1 * 0.50 + f2 * 0.5 + gap;
+
+  const splitX = CX - wTotal / 2 + wElectro;
+
+  const k = Math.min(1, 1500 / W, 850 / H);
+  const OW = Math.max(1, Math.round(W * k));
+  const OH = Math.max(1, Math.round(H * k));
+
+  const off = document.createElement('canvas');
+  off.width = OW; off.height = OH;
+  const o = off.getContext('2d', { willReadFrequently: true });
+  o.textBaseline = 'middle';
+  o.fillStyle = '#ffffff';
+
+  const inv = 1 / k;
+  const pushSamples = (colorIdx, step) => {
+    const img = o.getImageData(0, 0, OW, OH).data;
+    const W4 = OW * 4;
+    for (let y = 0; y < OH; y += step){
+      const row = y * W4;
+      for (let x = 0; x < OW; x += step){
+        if (img[row + x * 4 + 3] > 130){
+          titleParticles.push({
+            tx: x * inv, ty: y * inv,
+            col: colorIdx,
+            size: 0.75 + Math.random() * 1.35
+          });
+        }
+      }
+    }
+  };
+
+  o.clearRect(0, 0, OW, OH);
+  o.font = '900 ' + (f1 * k) + 'px ' + FAM;
+  o.textAlign = 'center';
+  o.fillText('ElectroField', CX * k, y1 * k);
+  pushSamples(0, Math.max(1, Math.round(2.52 * k)));
+
+  o.clearRect(0, 0, OW, OH);
+  o.font = '800 ' + (f2 * k) + 'px ' + FAM;
+  drawTracked(o, 'EDU', CX * k, y2 * k, f2 * k * 0.52);
+  pushSamples(1, Math.max(1, Math.round(2.52 * k)));
+
+  for (let i = 0; i < titleParticles.length; i++){
+    const p = titleParticles[i];
+    if (p.col === 0 && p.tx > splitX) p.col = 1;
+  }
+
+  const MAXP = 5670;
+  if (titleParticles.length > MAXP){
+    const keep = MAXP / titleParticles.length;
+    titleParticles = titleParticles.filter(() => Math.random() < keep);
+  }
+
+  const minX = CX - Math.min(W * 0.5, 700);
+  for (let i = 0; i < titleParticles.length; i++){
+    const p = titleParticles[i];
+    const ang = Math.random() * TAU;
+    const rad = 120 + Math.random() * Math.max(W, H) * 0.62;
+    p.sx = CX + Math.cos(ang) * rad;
+    p.sy = CY + Math.sin(ang) * rad * 0.65;
+    p.delay = clamp01((p.tx - minX) / (W * 0.9)) * 0.30 + Math.random() * 0.20;
+  }
+
+  textReady = true;
+}
+
+function drawTracked(c, str, cx, cy, tr){
+  const chars = Array.from(str);
+  const ws = chars.map(ch => c.measureText(ch).width);
+  let total = tr * (chars.length - 1);
+  for (let i = 0; i < ws.length; i++) total += ws[i];
+
+  const prev = c.textAlign;
+  c.textAlign = 'left';
+  let x = cx - total / 2;
+  for (let i = 0; i < chars.length; i++){
+    c.fillText(chars[i], x, cy);
+    x += ws[i] + tr;
+  }
+  c.textAlign = prev;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   CONTROL
+   ══════════════════════════════════════════════════════════════════════ */
+function start(){
+  ended = false;
+  elapsed = 0;
+  lastTs = 0;
+  rippleTimer = 0;
+  ripples = [];
+  tracers = [];
+  buildTracers();
+
+  btnShown = false;
+  btn.classList.remove('show');
+
+  cv.classList.remove('gone');
+  running = true;
+  t0 = performance.now();
+  cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(loop);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   LOOP
+   ══════════════════════════════════════════════════════════════════════ */
+function loop(now){
+  if (!running) return;
+  if (!lastTs) lastTs = now;
+  let dt = (now - lastTs) / 1000;
+  lastTs = now;
+  dt = Math.min(dt, 0.05);
+  elapsed += dt;
+
+  // ⏱️  Aparición del botón "Get Started" (0.10 s después del título)
+  if (!btnShown && elapsed >= BTN_APPEAR_AT){
+    btnShown = true;
+    btn.classList.add('show');
+  }
+
+  render(elapsed, dt);
+
+  rafId = requestAnimationFrame(loop);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   RENDER
+   ══════════════════════════════════════════════════════════════════════ */
+function render(t, dt){
+  const fadeIn  = ease.out2(seg(t, T.fadeIn[0], T.fadeIn[1]));
+  const orbIn   = ease.out4(seg(t, T.orbIn[0],  T.orbIn[1]));
+  const split   = ease.io3 (seg(t, T.split[0],  T.split[1]));
+  const linesP  = ease.out3(seg(t, T.lines[0],  T.lines[1]));
+  const tracersP= seg(t, T.tracers[0], T.tracers[1]);
+  const titleP  = ease.out3(seg(t, T.title[0],  T.title[1]));
+  const pulseP  = seg(t, T.pulse[0], T.pulse[1]);
+
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = rgb(BG);
+  ctx.fillRect(0, 0, W, H);
+
+  const amb = ctx.createRadialGradient(CX, CY, 0, CX, CY, Math.max(W, H) * 0.62);
+  const ambA = 0.055 * orbIn;
+  amb.addColorStop(0,    rgba(CYAN, ambA * 1.25));
+  amb.addColorStop(0.45, rgba(CYAN, ambA * 0.32));
+  amb.addColorStop(1,    rgba(BG, 0));
+  ctx.fillStyle = amb;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < dust.length; i++){
+    const d = dust[i];
+    d.x += d.vx * dt;
+    d.y += d.vy * dt;
+    if (d.x < -8) d.x = W + 8; else if (d.x > W + 8) d.x = -8;
+    if (d.y < -8) d.y = H + 8; else if (d.y > H + 8) d.y = -8;
+
+    const tw = 0.55 + 0.45 * Math.sin(t * 1.7 + d.ph);
+    ctx.globalAlpha = d.a * tw * fadeIn;
+    ctx.fillStyle = rgb(BONE);
+    ctx.beginPath();
+    ctx.arc(d.x, d.y, d.r, 0, TAU);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  const camT = ease.io3(clamp01((t - 0.4) / 3.4));
+  const zoom = lerp(zStart, zEnd, camT);
+  const sep  = lerp(0, 1, split);
+
+  ctx.save();
+  ctx.translate(CX, CY);
+  ctx.scale(zoom, zoom);
+
+  if (t > T.lines[0]){
+    spawnRipples(t, dt);
+    drawRipples(t, zoom);
+  }
+
+  if (linesP > 0.001){
+    drawFieldLines(linesP, zoom);
+  }
+
+  if (orbIn > 0.001){
+    drawCharges(t, orbIn, sep, split, zoom);
+  }
+
+  if (tracersP > 0.001 && linesP > 0.25){
+    updateTracers(dt, tracersP);
+    drawTracers(tracersP, zoom);
+  }
+
+  const burstT = seg(t, T.split[0] + 0.55, T.split[0] + 1.5);
+  if (burstT > 0 && burstT < 1){
+    const r = ease.out3(burstT) * Math.max(W, H) * 0.85;
+    const a = (1 - burstT) * (1 - burstT) * 0.85;
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.strokeStyle = rgba(BONE, a * 0.55);
+    ctx.lineWidth = lerp(5, 1.2, burstT) / zoom;
+    ctx.beginPath();
+    ctx.arc(0, 0, r / zoom, 0, TAU);
+    ctx.stroke();
+
+    ctx.strokeStyle = rgba(CYAN, a * 0.42);
+    ctx.lineWidth = lerp(2.4, 0.6, burstT) / zoom;
+    ctx.beginPath();
+    ctx.arc(0, 0, (r / zoom) * 0.82, 0, TAU);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+
+  if (titleP > 0.001 && textReady){
+    drawTitleParticles(t, titleP, pulseP);
+  }
+
+  const flashT = seg(t, T.split[0] + 1.15, T.split[0] + 1.55);
+  if (flashT > 0 && flashT < 1){
+    const a = Math.sin(flashT * Math.PI) * 0.34;
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = rgba(BONE, a);
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  if (t > T.title[1] && t < T.pulse[1]){
+    const sw = seg(t, T.title[1], T.pulse[1]);
+    if (sw > 0 && sw < 1){
+      const x = lerp(-W * 0.3, W * 1.3, ease.io3(sw));
+      const g = ctx.createLinearGradient(x - 220, 0, x + 220, 0);
+      g.addColorStop(0,   rgba(CYAN, 0));
+      g.addColorStop(0.5, rgba(CYAN, 0.18 * Math.sin(sw * Math.PI)));
+      g.addColorStop(1,   rgba(CYAN, 0));
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = g;
+      ctx.fillRect(0, CY - Math.min(W, H) * 0.35, W, Math.min(W, H) * 0.7);
+    }
+  }
+
+  ctx.globalCompositeOperation = 'source-over';
+  const vg = ctx.createRadialGradient(
+    CX, CY, Math.min(W, H) * 0.28,
+    CX, CY, Math.max(W, H) * 0.78
+  );
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(1, 'rgba(0,0,0,0.72)');
+  ctx.fillStyle = vg;
+  ctx.fillRect(0, 0, W, H);
+
+  if (grainCv){
+    if (!grainPattern) grainPattern = ctx.createPattern(grainCv, 'repeat');
+    grainOffset = (grainOffset + 1) % 128;
+    ctx.save();
+    ctx.globalAlpha = 0.055 * (0.6 + 0.4 * fadeIn);
+    ctx.globalCompositeOperation = 'overlay';
+    ctx.translate(-grainOffset, -grainOffset * 0.7);
+    ctx.fillStyle = grainPattern;
+    ctx.fillRect(0, 0, W + 140, H + 140);
+    ctx.restore();
+  }
+
+  applyBloom(fadeIn);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   BLOOM
+   ══════════════════════════════════════════════════════════════════════ */
+function applyBloom(fadeIn){
+  if (fadeIn <= 0) return;
+
+  ctx.save();
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.globalAlpha = 1;
+
+  const radius = Math.max(W, H) * 0.62;
+  const g = ctx.createRadialGradient(CX, CY, 0, CX, CY, radius);
+  const a = 0.075 * fadeIn;
+  g.addColorStop(0.00, rgba(CYAN, a * 1.00));
+  g.addColorStop(0.24, rgba(CYAN, a * 0.46));
+  g.addColorStop(0.55, rgba(CYAN, a * 0.12));
+  g.addColorStop(1.00, rgba(CYAN, 0));
+
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   LÍNEAS DE CAMPO
+   ══════════════════════════════════════════════════════════════════════ */
+function drawFieldLines(P, zoom){
+  const e = ease.out3(P);
+  ctx.globalCompositeOperation = 'lighter';
+
+  for (let li = 0; li < fieldLines.length; li++){
+    const pts = fieldLines[li];
+    const n = pts.length;
+    const count = Math.max(2, Math.floor(n * e));
+    const lenFade = 1 - (li / fieldLines.length) * 0.35;
+
+    const a0 = 0.30 * lenFade;
+    ctx.strokeStyle = rgba(BONE, a0);
+    ctx.lineWidth = 1.05 / zoom;
+    ctx.lineCap = 'round';
+
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < count; i++) ctx.lineTo(pts[i].x, pts[i].y);
+    ctx.stroke();
+
+    ctx.strokeStyle = rgba(CYAN, a0 * 0.42);
+    ctx.lineWidth = 2.4 / zoom;
+    ctx.globalAlpha = 0.42;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    if (P < 1 && count > 2 && count < n && glowBone){
+      const tip = pts[count - 1];
+      const sz = 36;
+      ctx.globalAlpha = 0.85;
+      ctx.drawImage(glowBone, tip.x - sz / 2, tip.y - sz / 2, sz, sz);
+      ctx.globalAlpha = 1;
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   CARGAS
+   ══════════════════════════════════════════════════════════════════════ */
+function drawCharges(t, orbIn, sep, split, zoom){
+  ctx.globalCompositeOperation = 'lighter';
+  const R = 22;
+
+  for (let i = 0; i < charges.length; i++){
+    const c = charges[i];
+    const x = c.x * sep;
+    const y = 0;
+
+    const localIn = clamp01((orbIn - i * 0.10) / 0.85);
+    if (localIn <= 0) continue;
+    const s = ease.back(localIn);
+    const rr = R * s * (c.scale || 1);
+
+    const breathe = 1 + 0.055 * Math.sin(t * 2.1 + i * 1.7);
+
+    const g1 = ctx.createRadialGradient(x, y, 0, x, y, rr * 8.5 * breathe);
+    g1.addColorStop(0,    rgba(c.col, 0.55 * localIn));
+    g1.addColorStop(0.22, rgba(c.col, 0.20 * localIn));
+    g1.addColorStop(0.6,  rgba(c.col, 0.05 * localIn));
+    g1.addColorStop(1,    rgba(c.col, 0));
+    ctx.fillStyle = g1;
+    ctx.beginPath();
+    ctx.arc(x, y, rr * 8.5 * breathe, 0, TAU);
+    ctx.fill();
+
+    const g2 = ctx.createRadialGradient(x - rr * 0.28, y - rr * 0.28, 0, x, y, rr);
+    g2.addColorStop(0,   rgba(BONE, 0.95 * localIn));
+    g2.addColorStop(0.30, rgba(c.col, 0.98 * localIn));
+    g2.addColorStop(1,   rgba(c.col, 0.42 * localIn));
+    ctx.fillStyle = g2;
+    ctx.beginPath();
+    ctx.arc(x, y, rr, 0, TAU);
+    ctx.fill();
+
+    ctx.strokeStyle = rgba(BONE, 0.55 * localIn);
+    ctx.lineWidth = 1.3 / zoom;
+    ctx.beginPath();
+    ctx.arc(x, y, rr + 1.5 / zoom, 0, TAU);
+    ctx.stroke();
+
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = rgba(BG, 0.92 * localIn);
+    ctx.lineWidth = rr * 0.16;
+    ctx.lineCap = 'round';
+    const arm = rr * 0.42;
+    ctx.beginPath();
+    ctx.moveTo(x - arm, y); ctx.lineTo(x + arm, y);
+    if (c.sign === '+'){
+      ctx.moveTo(x, y - arm); ctx.lineTo(x, y + arm);
+    }
+    ctx.stroke();
+    ctx.globalCompositeOperation = 'lighter';
+  }
+
+  if (split < 0.62){
+    const k = 1 - split / 0.62;
+    const core = ease.out3(k);
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 130 * core);
+    g.addColorStop(0,   rgba(BONE, 0.95 * core));
+    g.addColorStop(0.18,rgba(CYAN, 0.55 * core));
+    g.addColorStop(0.5, rgba(ROSE, 0.16 * core));
+    g.addColorStop(1,   rgba(BG, 0));
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(0, 0, 130 * core, 0, TAU);
+    ctx.fill();
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ANILLOS DE POTENCIAL
+   ══════════════════════════════════════════════════════════════════════ */
+function spawnRipples(t, dt){
+  rippleTimer -= dt;
+  if (rippleTimer > 0) return;
+  rippleTimer = 0.42;
+
+  for (let i = 0; i < charges.length; i++){
+    const c = charges[i];
+    ripples.push({
+      x: c.x, y: c.y,
+      born: t,
+      life: 2.6 + Math.random() * 0.7,
+      col: c.col
+    });
+  }
+  if (ripples.length > 70) ripples.splice(0, ripples.length - 70);
+}
+
+function drawRipples(t, zoom){
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = ripples.length - 1; i >= 0; i--){
+    const r = ripples[i];
+    const age = (t - r.born) / r.life;
+    if (age >= 1){ ripples.splice(i, 1); continue; }
+
+    const rad = ease.out3(age) * 340;
+    const a = (1 - age) * (1 - age) * 0.42;
+
+    ctx.strokeStyle = rgba(r.col, a * 0.75);
+    ctx.lineWidth = lerp(2.2, 0.4, age) / zoom;
+    ctx.beginPath();
+    ctx.arc(r.x, r.y, rad, 0, TAU);
+    ctx.stroke();
+
+    if (age > 0.16){
+      const a2 = age - 0.16;
+      const rad2 = ease.out3(a2) * 340;
+      ctx.strokeStyle = rgba(BONE, (1 - a2) * (1 - a2) * 0.13);
+      ctx.lineWidth = lerp(1.4, 0.3, a2) / zoom;
+      ctx.beginPath();
+      ctx.arc(r.x, r.y, rad2, 0, TAU);
+      ctx.stroke();
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   TRAZADORAS
+   ══════════════════════════════════════════════════════════════════════ */
+function updateTracers(dt, P){
+  for (let i = 0; i < tracers.length; i++){
+    const tr = tracers[i];
+    const meta = lineLens[tr.li];
+    if (!meta) continue;
+
+    const speed = tr.spd * (0.5 + P);
+    tr.u += speed * dt;
+    if (tr.u > 1){
+      Object.assign(tr, makeTracer(false));
+      continue;
+    }
+  }
+}
+
+function sampleLine(li, u){
+  const pts = fieldLines[li];
+  const meta = lineLens[li];
+  if (!pts || !meta) return null;
+
+  const target = u * meta.total;
+  const acc = meta.acc;
+
+  let lo = 0, hi = acc.length - 1;
+  while (lo < hi - 1){
+    const mid = (lo + hi) >> 1;
+    if (acc[mid] < target) lo = mid; else hi = mid;
+  }
+  const a = pts[lo], b = pts[hi];
+  const d = acc[hi] - acc[lo] || 1;
+  const f = clamp01((target - acc[lo]) / d);
+
+  return { x: lerp(a.x, b.x, f), y: lerp(a.y, b.y, f) };
+}
+
+function drawTracers(P, zoom){
+  ctx.globalCompositeOperation = 'lighter';
+  const alpha = P;
+  const perf = performance.now() * 0.006;
+
+  for (let i = 0; i < tracers.length; i++){
+    const tr = tracers[i];
+    const head = sampleLine(tr.li, tr.u);
+    const tail = sampleLine(tr.li, Math.max(0, tr.u - 0.030));
+    if (!head || !tail) continue;
+
+    const flick = 0.62 + 0.38 * Math.sin(perf + tr.flick);
+    const col = tr.cyan ? CYAN : BONE;
+
+    ctx.strokeStyle = rgba(col, 0.30 * alpha * flick);
+    ctx.lineWidth = tr.w / zoom;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(tail.x, tail.y);
+    ctx.lineTo(head.x, head.y);
+    ctx.stroke();
+
+    const sprite = tr.cyan ? glowCyan : glowBone;
+    if (sprite){
+      const sz = tr.w * 10;
+      ctx.globalAlpha = 0.85 * alpha * flick;
+      ctx.drawImage(sprite, head.x - sz / 2, head.y - sz / 2, sz, sz);
+      ctx.globalAlpha = 1;
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   TÍTULO (partículas)
+   ══════════════════════════════════════════════════════════════════════ */
+function drawTitleParticles(t, titleP, pulseP){
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.globalCompositeOperation = 'lighter';
+
+  const pulse = 1 + 0.022 * Math.sin(t * 2.5) * pulseP;
+
+  const fillBone = rgba(BONE, 1);
+  const fillCyan = rgba(CYAN, 1);
+
+  for (let i = 0; i < titleParticles.length; i++){
+    const p = titleParticles[i];
+    const local = (titleP - p.delay) / 0.50;
+    if (local <= 0) continue;
+
+    const lc = local > 1 ? 1 : local;
+    const e = ease.out5(lc);
+
+    const x = lerp(p.sx, p.tx, e);
+    const y = lerp(p.sy, p.ty, e);
+
+    const px = CX + (x - CX) * pulse;
+    const py = CY + (y - CY) * pulse;
+
+    if (lc < 1 && glowBone){
+      const sz = 18;
+      ctx.globalAlpha = 0.60 * (1 - lc) * (p.col === 1 ? 0.9 : 1);
+      ctx.drawImage(glowBone, px - sz / 2, py - sz / 2, sz, sz);
+      ctx.globalAlpha = 1;
+    }
+
+    const settle = 0.55 + 0.45 * e;
+    let a, fill;
+    if (p.col === 0){ a = 0.92 * lc * settle; fill = fillBone; }
+    else if (p.col === 1){ a = 0.95 * lc * settle; fill = fillCyan; }
+    else { a = 0.36 * lc * settle; fill = fillBone; }
+
+    ctx.globalAlpha = a;
+    ctx.fillStyle = fill;
+    const sz = p.size * (0.55 + 0.45 * e);
+    ctx.fillRect(px - sz, py - sz, sz * 2, sz * 2);
+  }
+  ctx.globalAlpha = 1;
+
+  if (titleP > 0.65){
+    const ha = (titleP - 0.65) / 0.35 * 0.16;
+    const cy = CY - 20;
+    const g = ctx.createRadialGradient(CX, cy, 0, CX, cy, Math.min(W * 0.55, 700));
+    g.addColorStop(0,   rgba(CYAN, ha));
+    g.addColorStop(0.5, rgba(CYAN, ha * 0.30));
+    g.addColorStop(1,   rgba(CYAN, 0));
+    ctx.fillStyle = g;
+    ctx.fillRect(0, cy - 260, W, 520);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   EVENTOS
+   ══════════════════════════════════════════════════════════════════════ */
+let rzTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(rzTimer);
+  rzTimer = setTimeout(() => {
+    resize();
+    if (running) buildTracers();
+  }, 180);
+});
+
+/* ══════════════════════════════════════════════════════════════════════
+   ARRANQUE
+   ══════════════════════════════════════════════════════════════════════ */
+function boot(){
+  buildSprites();
+  resize();
+  start();
+}
+
+if (document.fonts && document.fonts.ready){
+  document.fonts.ready.then(boot);
+} else {
+  boot();
+}
+
+/* ─────── API para detener el intro desde fuera ─────── */
+window.__stopIntro = function(){
+  running = false;
+  cancelAnimationFrame(rafId);
+};
+
+})();
+
+/* ============================================================
+   ════════════════════════════════════════════════════════════
+   2. APP SCRIPT (app.js)
+   ════════════════════════════════════════════════════════════
+   ============================================================ */
+(function(){
+'use strict';
+
+/* ============ 1. CONFIGURACIÓN ============ */
+const CONFIG = {
+  K: 8.99e9,
+  Q_UNIT: 1e-9,
+  PX_PER_M: 60,
+  SOFT: 0.15,
+  SOFT2: 0.15 * 0.15,
+  PARTICLES: 150,
+  FIELD_LINE_STEP: 4,
+  FIELD_LINE_MAX: 900,
+  POT_STEP: 8,
+  PARTICLE_RESET_R2: 289,
+  VECTOR_SKIP_R2: 900,
+  LINE_HIT_R2: 256,
+};
+
+/* ============ 2. ESTADO ============ */
+const state = {
+  tool: 'pos',
+  charges: [],
+  probe: null,
+  probeSign: 1,
+  drag: null,
+  particles: [],
+  particlesPaused: false,
+  showVectors: true,
+  showFieldLines: true,
+  showPotential: true,
+  showEqui: true,
+  showParticles: true,
+  showGrid: false,
+  density: 42,
+  strength: 1,
+  game: false,
+  gameWon: false,
+  gameParticle: null,
+  gameTarget: null,
+  fieldLines: null,
+  potCache: null,
+};
+
+/* ============ 3. DOM ============ */
+const dom = {
+  canvas: document.getElementById('canvas'),
+  stage: document.getElementById('stage'),
+  status: document.getElementById('status'),
+  qSlider: document.getElementById('qSlider'),
+  qLabel: document.getElementById('qLabel'),
+  densitySlider: document.getElementById('densitySlider'),
+  densityLabel: document.getElementById('densityLabel'),
+  strengthSlider: document.getElementById('strengthSlider'),
+  strengthLabel: document.getElementById('strengthLabel'),
+  eValue: document.getElementById('eValue'),
+  fValue: document.getElementById('fValue'),
+  angleValue: document.getElementById('angleValue'),
+  vValue: document.getElementById('vValue'),
+  gameHint: document.getElementById('gameHint'),
+  fileInput: document.getElementById('fileInput'),
+  pauseBtn: document.getElementById('pauseBtn'),
+  probePlus: document.getElementById('probePlus'),
+  probeMinus: document.getElementById('probeMinus'),
+  toggleVectors: document.getElementById('vectorsToggle'),
+  toggleFieldLines: document.getElementById('fieldLinesToggle'),
+  togglePotential: document.getElementById('potentialToggle'),
+  toggleEqui: document.getElementById('equiToggle'),
+  toggleParticles: document.getElementById('particlesToggle'),
+  toggleGrid: document.getElementById('gridToggle'),
+  toggleGame: document.getElementById('gameToggle'),
+  btnPos: document.getElementById('posBtn'),
+  btnNeg: document.getElementById('negBtn'),
+  btnProbe: document.getElementById('probeBtn'),
+  btnDelete: document.getElementById('deleteBtn'),
+  btnDipole: document.getElementById('dipoleBtn'),
+  btnSame: document.getElementById('sameBtn'),
+  btnCapacitor: document.getElementById('capacitorBtn'),
+  btnQuad: document.getElementById('quadBtn'),
+  btnClear: document.getElementById('clearBtn'),
+  btnSave: document.getElementById('saveBtn'),
+  btnLoad: document.getElementById('loadBtn'),
+  btnExport: document.getElementById('exportBtn'),
+  btnImport: document.getElementById('importBtn'),
+};
+
+const canvas = dom.canvas;
+const ctx = canvas.getContext('2d');
+const stage = dom.stage;
+let W = 0, H = 0, dpr = 1;
+
+/* ============ 4. CAPA ESTÁTICA ============ */
+const staticCanvas = document.createElement('canvas');
+const staticCtx = staticCanvas.getContext('2d');
+let staticDirty = true;
+
+function markDirty() {
+  state.fieldLines = null;
+  state.potCache = null;
+  staticDirty = true;
+}
+
+/* ============ 5. UTILIDADES ============ */
+const clamp = (v, a, b) => v < a ? a : (v > b ? b : v);
+
+function pointerPos(e) {
+  const r = canvas.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+function fmt(v) {
+  if (!Number.isFinite(v)) return '—';
+  const a = v < 0 ? -v : v;
+  if (a === 0) return '0';
+  if (a >= 1e4 || a < 1e-2) return v.toExponential(2);
+  return v.toFixed(2);
+}
+
+/* ============ 6. FÍSICA ============ */
+function fieldVec(x, y) {
+  const charges = state.charges;
+  const n = charges.length;
+  const K = CONFIG.K, QU = CONFIG.Q_UNIT, PPM = CONFIG.PX_PER_M, SOFT2 = CONFIG.SOFT2;
+  let ex = 0, ey = 0;
+  for (let i = 0; i < n; i++) {
+    const c = charges[i];
+    const dx = (x - c.x) / PPM;
+    const dy = (y - c.y) / PPM;
+    const r2 = dx * dx + dy * dy + SOFT2;
+    const invR3 = 1 / (r2 * Math.sqrt(r2));
+    const kq = K * c.q * QU;
+    ex += kq * dx * invR3;
+    ey += kq * dy * invR3;
+  }
+  return { ex, ey, mag: Math.sqrt(ex * ex + ey * ey) };
+}
+
+function fieldV(x, y) {
+  const charges = state.charges;
+  const n = charges.length;
+  const K = CONFIG.K, QU = CONFIG.Q_UNIT, PPM = CONFIG.PX_PER_M, SOFT2 = CONFIG.SOFT2;
+  let v = 0;
+  for (let i = 0; i < n; i++) {
+    const c = charges[i];
+    const dx = (x - c.x) / PPM;
+    const dy = (y - c.y) / PPM;
+    const r = Math.sqrt(dx * dx + dy * dy + SOFT2);
+    v += K * c.q * QU / r;
+  }
+  return v;
+}
+
+function fieldAt(x, y) {
+  const charges = state.charges;
+  const n = charges.length;
+  const K = CONFIG.K, QU = CONFIG.Q_UNIT, PPM = CONFIG.PX_PER_M, SOFT2 = CONFIG.SOFT2;
+  let ex = 0, ey = 0, v = 0;
+  for (let i = 0; i < n; i++) {
+    const c = charges[i];
+    const dx = (x - c.x) / PPM;
+    const dy = (y - c.y) / PPM;
+    const r2 = dx * dx + dy * dy + SOFT2;
+    const r = Math.sqrt(r2);
+    const invR3 = 1 / (r2 * r);
+    const kq = K * c.q * QU;
+    ex += kq * dx * invR3;
+    ey += kq * dy * invR3;
+    v += kq / r;
+  }
+  return { ex, ey, mag: Math.sqrt(ex * ex + ey * ey), v };
+}
+
+function tooClose(x, y, r2) {
+  const charges = state.charges;
+  for (let i = 0; i < charges.length; i++) {
+    const c = charges[i];
+    const dx = x - c.x, dy = y - c.y;
+    if (dx * dx + dy * dy < r2) return true;
+  }
+  return false;
+}
+
+/* ============ 7. RESIZE ============ */
+function resize() {
+  const r = stage.getBoundingClientRect();
+  W = r.width;
+  H = r.height;
+  dpr = Math.min(2, window.devicePixelRatio || 1);
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  seedParticles();
+  markDirty();
+}
+
+let resizePending = false;
+function scheduleResize() {
+  if (resizePending) return;
+  resizePending = true;
+  requestAnimationFrame(() => { resizePending = false; resize(); });
+}
+
+/* ============ 8. PARTÍCULAS ============ */
+function seedParticles() {
+  const arr = state.particles;
+  arr.length = 0;
+  for (let i = 0; i < CONFIG.PARTICLES; i++) {
+    arr.push({ x: Math.random() * W, y: Math.random() * H, life: Math.random() * 180 });
+  }
+}
+
+function resetParticle(p) {
+  p.x = Math.random() * W;
+  p.y = Math.random() * H;
+  p.life = 140 + Math.random() * 120;
+}
+
+function updateParticles() {
+  if (state.particlesPaused || !state.showParticles || !state.charges.length) return;
+  const particles = state.particles;
+  const strength = state.strength;
+  const r2Limit = CONFIG.PARTICLE_RESET_R2;
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[i];
+    const f = fieldVec(p.x, p.y);
+    if (f.mag > 0) {
+      const s = (0.6 + Math.min(2.8, Math.log10(1 + f.mag) * 0.9)) * strength;
+      p.x += f.ex / f.mag * s;
+      p.y += f.ey / f.mag * s;
+    }
+    if (--p.life < 0 || p.x < 0 || p.y < 0 || p.x > W || p.y > H || tooClose(p.x, p.y, r2Limit)) {
+      resetParticle(p);
+    }
+  }
+}
+
+/* ============ 9. CACHÉS ============ */
+function buildFieldLines() {
+  const charges = state.charges;
+  if (!charges.length) return [];
+  const positives = [], negatives = [];
+  for (let i = 0; i < charges.length; i++) {
+    if (charges[i].q > 0) positives.push(charges[i]);
+    else if (charges[i].q < 0) negatives.push(charges[i]);
+  }
+  const sources = positives.length ? positives : negatives;
+  const dir = positives.length ? 1 : -1;
+  const stepLen = CONFIG.FIELD_LINE_STEP;
+  const maxSteps = CONFIG.FIELD_LINE_MAX;
+  const hitR2 = CONFIG.LINE_HIT_R2;
+  const lines = [];
+
+  for (let s = 0; s < sources.length; s++) {
+    const src = sources[s];
+    const count = clamp(Math.round(Math.abs(src.q) * 14), 8, 24);
+    for (let i = 0; i < count; i++) {
+      const a = (i / count) * Math.PI * 2;
+      let x = src.x + Math.cos(a) * 22;
+      let y = src.y + Math.sin(a) * 22;
+      const pts = [{ x, y }];
+      let hit = false;
+      for (let k = 0; k < maxSteps; k++) {
+        const f = fieldVec(x, y);
+        if (f.mag < 1e-12) break;
+        x += f.ex / f.mag * stepLen * dir;
+        y += f.ey / f.mag * stepLen * dir;
+        pts.push({ x, y });
+        if (x < -60 || y < -60 || x > W + 60 || y > H + 60) break;
+        for (let ni = 0; ni < negatives.length; ni++) {
+          const nc = negatives[ni];
+          const ddx = x - nc.x, ddy = y - nc.y;
+          if (ddx * ddx + ddy * ddy < hitR2) { hit = true; break; }
+        }
+        if (hit) break;
+      }
+      lines.push(pts);
+    }
+  }
+  return lines;
+}
+
+function buildPotentialCache() {
+  const step = CONFIG.POT_STEP;
+  const cols = Math.ceil(W / step);
+  const rows = Math.ceil(H / step);
+  const data = new Float32Array(cols * rows);
+  let mn = Infinity, mx = -Infinity;
+  for (let j = 0; j < rows; j++) {
+    const y = j * step;
+    const rowOff = j * cols;
+    for (let i = 0; i < cols; i++) {
+      const v = fieldV(i * step, y);
+      data[rowOff + i] = v;
+      if (v < mn) mn = v;
+      if (v > mx) mx = v;
+    }
+  }
+  return { step, cols, rows, data, min: mn, max: mx };
+}
+
+/* ============ 10. DIBUJO ESTÁTICO ============ */
+function paintGrid(g) {
+  if (!state.showGrid) return;
+  g.strokeStyle = 'rgba(244, 239, 230, 0.05)';
+  g.lineWidth = 1;
+  g.beginPath();
+  for (let x = 0; x < W; x += 40) { g.moveTo(x, 0); g.lineTo(x, H); }
+  for (let y = 0; y < H; y += 40) { g.moveTo(0, y); g.lineTo(W, y); }
+  g.stroke();
+}
+
+function paintPotential(g) {
+  if (!state.showPotential || !state.potCache || !state.charges.length) return;
+  const { step, cols, rows, data } = state.potCache;
+  const scale = 0.02;
+  for (let j = 0; j < rows; j++) {
+    const rowOff = j * cols;
+    const py = j * step;
+    for (let i = 0; i < cols; i++) {
+      const v = data[rowOff + i];
+      const a = Math.min(0.15, Math.abs(Math.tanh(v * scale)) * 0.15);
+      if (a < 0.01) continue;
+      g.fillStyle = v >= 0
+        ? 'rgba(244, 63, 94, ' + a + ')'
+        : 'rgba(94, 234, 212, ' + a + ')';
+      g.fillRect(i * step, py, step + 1, step + 1);
+    }
+  }
+}
+
+function paintEqui(g) {
+  if (!state.showEqui || !state.potCache || !state.charges.length) return;
+  const { step, cols, rows, data, min, max } = state.potCache;
+  if (!isFinite(min) || !isFinite(max) || min === max) return;
+  const absMax = Math.max(Math.abs(min), Math.abs(max));
+
+  const levels = [];
+  for (let i = 1; i <= 10; i++) {
+    const t = absMax * (i / 11);
+    levels.push(-t, t);
+  }
+  const nLevels = levels.length;
+
+  g.strokeStyle = 'rgba(244, 239, 230, 0.18)';
+  g.lineWidth = 1;
+  g.beginPath();
+
+  for (let j = 0; j < rows - 1; j++) {
+    const rowOff = j * cols;
+    const rowOffN = (j + 1) * cols;
+    const y0 = j * step;
+    for (let i = 0; i < cols - 1; i++) {
+      const v00 = data[rowOff + i];
+      const v10 = data[rowOff + i + 1];
+      const v01 = data[rowOffN + i];
+      const v11 = data[rowOffN + i + 1];
+      const cMin = Math.min(v00, v10, v01, v11);
+      const cMax = Math.max(v00, v10, v01, v11);
+      const x0 = i * step;
+
+      for (let k = 0; k < nLevels; k++) {
+        const level = levels[k];
+        if (level < cMin || level > cMax) continue;
+
+        const pts = [];
+        if ((v00 - level) * (v10 - level) < 0) {
+          pts.push(x0 + step * (level - v00) / (v10 - v00), y0);
+        }
+        if ((v10 - level) * (v11 - level) < 0) {
+          pts.push(x0 + step, y0 + step * (level - v10) / (v11 - v10));
+        }
+        if ((v01 - level) * (v11 - level) < 0) {
+          pts.push(x0 + step * (level - v01) / (v11 - v01), y0 + step);
+        }
+        if ((v00 - level) * (v01 - level) < 0) {
+          pts.push(x0, y0 + step * (level - v00) / (v01 - v00));
+        }
+        if (pts.length >= 4) {
+          g.moveTo(pts[0], pts[1]);
+          g.lineTo(pts[2], pts[3]);
+        }
+      }
+    }
+  }
+  g.stroke();
+}
+
+function paintFieldLines(g) {
+  if (!state.showFieldLines || !state.fieldLines) return;
+  g.lineWidth = 1;
+  const lines = state.fieldLines;
+  for (let li = 0; li < lines.length; li++) {
+    const line = lines[li];
+    const len = line.length;
+    if (len < 2) continue;
+    const a = line[0], b = line[len - 1];
+    const grad = g.createLinearGradient(a.x, a.y, b.x, b.y);
+    grad.addColorStop(0, 'rgba(244, 239, 230, 0.28)');
+    grad.addColorStop(1, 'rgba(244, 239, 230, 0.06)');
+    g.strokeStyle = grad;
+    g.beginPath();
+    g.moveTo(a.x, a.y);
+    for (let i = 1; i < len; i++) g.lineTo(line[i].x, line[i].y);
+    g.stroke();
+  }
+}
+
+function paintVectors(g) {
+  if (!state.showVectors || !state.charges.length) return;
+  const step = state.density;
+  const strength = state.strength;
+  const skipR2 = CONFIG.VECTOR_SKIP_R2;
+
+  g.strokeStyle = 'rgba(244, 239, 230, 0.42)';
+  g.fillStyle = 'rgba(244, 239, 230, 0.42)';
+  g.lineWidth = 1.2;
+
+  for (let y = step / 2; y < H; y += step) {
+    for (let x = step / 2; x < W; x += step) {
+      if (tooClose(x, y, skipR2)) continue;
+      const f = fieldVec(x, y);
+      const m = f.mag;
+      if (m < 1e-12) continue;
+      const ux = f.ex / m, uy = f.ey / m;
+      const len = Math.min(22, (6 + Math.log10(1 + m) * 5) * strength);
+      const x2 = x + ux * len, y2 = y + uy * len;
+
+      g.beginPath();
+      g.moveTo(x - ux * len * 0.25, y - uy * len * 0.25);
+      g.lineTo(x2, y2);
+      g.stroke();
+
+      const a = 5;
+      g.beginPath();
+      g.moveTo(x2, y2);
+      g.lineTo(x2 - ux * a - uy * a * 0.55, y2 - uy * a + ux * a * 0.55);
+      g.lineTo(x2 - ux * a + uy * a * 0.55, y2 - uy * a - ux * a * 0.55);
+      g.closePath();
+      g.fill();
+    }
+  }
+}
+
+function rebuildStatic() {
+  if (staticCanvas.width !== canvas.width || staticCanvas.height !== canvas.height) {
+    staticCanvas.width = canvas.width;
+    staticCanvas.height = canvas.height;
+  }
+  staticCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  staticCtx.clearRect(0, 0, W, H);
+
+  paintGrid(staticCtx);
+  paintPotential(staticCtx);
+  paintEqui(staticCtx);
+  paintFieldLines(staticCtx);
+  paintVectors(staticCtx);
+
+  staticDirty = false;
+}
+
+/* ============ 11. DIBUJO DINÁMICO ============ */
+function drawParticles() {
+  if (!state.showParticles) return;
+  const particles = state.particles;
+  ctx.fillStyle = 'rgba(244, 239, 230, 0.55)';
+  ctx.beginPath();
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[i];
+    ctx.moveTo(p.x + 1.5, p.y);
+    ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+  }
+  ctx.fill();
+}
+
+function drawCharge(c) {
+  const absQ = Math.abs(c.q);
+  const isPos = c.q > 0;
+  const rad = 15 + absQ * 3;
+  const baseColor = isPos ? '#f43f5e' : '#5eead4';
+
+  const g = ctx.createRadialGradient(c.x - 4, c.y - 6, 2, c.x, c.y, rad * 1.8);
+  g.addColorStop(0, 'rgba(244,239,230,0.9)');
+  g.addColorStop(0.2, baseColor);
+  g.addColorStop(1, isPos ? 'rgba(244,63,94,0)' : 'rgba(94,234,212,0)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(c.x, c.y, rad * 1.8, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = baseColor;
+  ctx.beginPath();
+  ctx.arc(c.x, c.y, rad, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(244,239,230,0.9)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  ctx.fillStyle = '#080c14';
+  ctx.font = 'bold 20px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(isPos ? '+' : '−', c.x, c.y - 1);
+
+  ctx.fillStyle = 'rgba(244,239,230,0.6)';
+  ctx.font = '10px SF Mono, monospace';
+  ctx.fillText(absQ.toFixed(1) + ' nC', c.x, c.y + rad + 13);
+}
+
+const lastProbe = { e: null, f: null, a: null, v: null };
+
+function drawProbe() {
+  if (!state.probe) {
+    if (lastProbe.e !== '—') {
+      dom.eValue.textContent = '—';
+      dom.fValue.textContent = '—';
+      dom.angleValue.textContent = '—';
+      dom.vValue.textContent = '—';
+      lastProbe.e = lastProbe.f = lastProbe.a = lastProbe.v = '—';
+    }
+    return;
+  }
+
+  const f = fieldAt(state.probe.x, state.probe.y);
+  const fx = f.ex * state.probeSign;
+  const fy = f.ey * state.probeSign;
+  const ang = (Math.atan2(-f.ey, f.ex) * 180 / Math.PI + 360) % 360;
+
+  ctx.strokeStyle = 'rgba(244, 239, 230, 0.9)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(state.probe.x, state.probe.y, 12, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.fillStyle = '#f4efe6';
+  ctx.beginPath();
+  ctx.arc(state.probe.x, state.probe.y, 8, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#080c14';
+  ctx.font = 'bold 12px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(state.probeSign > 0 ? '+' : '−', state.probe.x, state.probe.y);
+
+  const m = Math.hypot(fx, fy);
+  if (m > 1e-12) {
+    const ux = fx / m, uy = fy / m;
+    const len = Math.min(22, (6 + Math.log10(1 + m) * 5) * state.strength);
+    const x2 = state.probe.x + ux * len;
+    const y2 = state.probe.y + uy * len;
+    ctx.strokeStyle = '#5eead4';
+    ctx.fillStyle = '#5eead4';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(state.probe.x, state.probe.y);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    const a = 6;
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - ux * a - uy * a * 0.55, y2 - uy * a + ux * a * 0.55);
+    ctx.lineTo(x2 - ux * a + uy * a * 0.55, y2 - uy * a - ux * a * 0.55);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  const eV = fmt(f.mag);
+  const fV = fmt(f.mag * CONFIG.Q_UNIT);
+  const aV = ang.toFixed(0) + '°';
+  const vV = fmt(f.v);
+  if (lastProbe.e !== eV) { dom.eValue.textContent = eV; lastProbe.e = eV; }
+  if (lastProbe.f !== fV) { dom.fValue.textContent = fV; lastProbe.f = fV; }
+  if (lastProbe.a !== aV) { dom.angleValue.textContent = aV; lastProbe.a = aV; }
+  if (lastProbe.v !== vV) { dom.vValue.textContent = vV; lastProbe.v = vV; }
+}
+
+function drawScale() {
+  const x = W - 100, y = H - 30;
+  const len = CONFIG.PX_PER_M;
+  ctx.strokeStyle = 'rgba(244, 239, 230, 0.5)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(x, y); ctx.lineTo(x + len, y);
+  ctx.moveTo(x, y - 4); ctx.lineTo(x, y + 4);
+  ctx.moveTo(x + len, y - 4); ctx.lineTo(x + len, y + 4);
+  ctx.stroke();
+  ctx.fillStyle = 'rgba(244, 239, 230, 0.6)';
+  ctx.font = '10px SF Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText('1 m', x + len / 2, y - 8);
+}
+
+/* ============ 12. MODO JUEGO ============ */
+function startGame() {
+  state.game = true;
+  state.gameWon = false;
+  state.gameParticle = { x: W * 0.12, y: H * 0.5, vx: 0, vy: 0 };
+  state.gameTarget = { x: W * 0.88, y: H * 0.5, r: 26 };
+  dom.gameHint.textContent = 'Lleva la partícula al objetivo colocando cargas.';
+}
+
+function resetGameParticle() {
+  const p = state.gameParticle;
+  p.x = W * 0.12;
+  p.y = H * 0.5;
+  p.vx = 0;
+  p.vy = 0;
+}
+
+function updateGame() {
+  if (!state.game || !state.gameParticle || state.gameWon) return;
+  const p = state.gameParticle;
+  const f = fieldVec(p.x, p.y);
+  if (f.mag > 0) {
+    const accel = Math.min(2.2, Math.log10(1 + f.mag) * 0.5);
+    p.vx += (f.ex / f.mag) * accel * 0.18;
+    p.vy += (f.ey / f.mag) * accel * 0.18;
+  }
+  p.vx *= 0.985;
+  p.vy *= 0.985;
+  p.x += p.vx;
+  p.y += p.vy;
+
+  if (p.x < -20 || p.y < -20 || p.x > W + 20 || p.y > H + 20) resetGameParticle();
+
+  const t = state.gameTarget;
+  const ddx = p.x - t.x, ddy = p.y - t.y;
+  if (ddx * ddx + ddy * ddy < t.r * t.r) {
+    state.gameWon = true;
+    dom.gameHint.textContent = '✓ ¡Objetivo alcanzado!';
+  }
+}
+
+function drawGame() {
+  if (!state.game) return;
+  const t = state.gameTarget;
+  const p = state.gameParticle;
+
+  ctx.strokeStyle = 'rgba(94, 234, 212, 0.9)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(t.x, t.y, t.r * 0.4, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(94, 234, 212, 0.15)';
+  ctx.fill();
+
+  if (p) {
+    ctx.fillStyle = state.gameWon ? '#5eead4' : '#f4efe6';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(244, 239, 230, 0.4)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 11, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+/* ============ 13. BUCLE PRINCIPAL ============ */
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+
+  if (state.charges.length > 0) {
+    if (staticDirty && state.showFieldLines && !state.fieldLines) state.fieldLines = buildFieldLines();
+    if (staticDirty && (state.showPotential || state.showEqui) && !state.potCache) state.potCache = buildPotentialCache();
+  }
+  if (staticDirty) rebuildStatic();
+
+  ctx.drawImage(staticCanvas, 0, 0, W, H);
+
+  updateParticles();
+  drawParticles();
+
+  const charges = state.charges;
+  for (let i = 0; i < charges.length; i++) drawCharge(charges[i]);
+  drawProbe();
+
+  if (state.game) { updateGame(); drawGame(); }
+  drawScale();
+
+  requestAnimationFrame(draw);
+}
+
+/* ============ 14. INTERACCIÓN ============ */
+function nearest(x, y, max = 28) {
+  let best = null, bd = max * max;
+  for (let i = 0; i < state.charges.length; i++) {
+    const c = state.charges[i];
+    const dx = x - c.x, dy = y - c.y;
+    const d2 = dx * dx + dy * dy;
+    if (d2 < bd) { bd = d2; best = { type: 'charge', i, obj: c }; }
+  }
+  if (state.probe) {
+    const dx = x - state.probe.x, dy = y - state.probe.y;
+    const d2 = dx * dx + dy * dy;
+    if (d2 < bd) best = { type: 'probe', obj: state.probe };
+  }
+  return best;
+}
+
+const toolButtons = [dom.btnPos, dom.btnNeg, dom.btnProbe, dom.btnDelete];
+const toolMap = { pos: dom.btnPos, neg: dom.btnNeg, probe: dom.btnProbe, 'delete': dom.btnDelete };
+const toolNames = { pos: 'carga positiva', neg: 'carga negativa', probe: 'carga de prueba', 'delete': 'eliminar' };
+
+function setTool(t) {
+  state.tool = t;
+  for (let i = 0; i < toolButtons.length; i++) toolButtons[i].classList.remove('active');
+  toolMap[t].classList.add('active');
+  dom.status.textContent = 'Herramienta: ' + toolNames[t] + ' · clic para colocar · arrastra para mover';
+}
+
+canvas.addEventListener('pointerdown', e => {
+  canvas.setPointerCapture(e.pointerId);
+  const p = pointerPos(e);
+  const hit = nearest(p.x, p.y);
+
+  if (hit && state.tool !== 'delete') { state.drag = hit; return; }
+
+  if (state.tool === 'delete') {
+    if (hit && hit.type === 'charge') {
+      state.charges.splice(hit.i, 1);
+      markDirty();
+      seedParticles();
+    } else if (hit && hit.type === 'probe') {
+      state.probe = null;
+    }
+    return;
+  }
+  if (state.tool === 'probe') { state.probe = { x: p.x, y: p.y }; return; }
+
+  state.charges.push({
+    x: p.x, y: p.y,
+    q: (+dom.qSlider.value) * (state.tool === 'pos' ? 1 : -1),
+  });
+  markDirty();
+  seedParticles();
+});
+
+canvas.addEventListener('pointermove', e => {
+  if (!state.drag) return;
+  const p = pointerPos(e);
+  state.drag.obj.x = p.x;
+  state.drag.obj.y = p.y;
+  markDirty();
+});
+
+canvas.addEventListener('pointerup', () => { state.drag = null; });
+canvas.addEventListener('pointercancel', () => { state.drag = null; });
+
+/* ============ 15. PRESETS ============ */
+function preset(kind) {
+  state.charges = [];
+  state.probe = null;
+  const cx = W / 2, cy = H / 2;
+
+  if (kind === 'dipole') {
+    state.charges = [
+      { x: cx - 120, y: cy, q: 1 },
+      { x: cx + 120, y: cy, q: -1 },
+    ];
+  } else if (kind === 'same') {
+    state.charges = [
+      { x: cx - 120, y: cy, q: 1 },
+      { x: cx + 120, y: cy, q: 1 },
+    ];
+  } else if (kind === 'capacitor') {
+    for (let i = -3; i <= 3; i++) {
+      state.charges.push({ x: cx - 150, y: cy + i * 48, q: 0.7 });
+      state.charges.push({ x: cx + 150, y: cy + i * 48, q: -0.7 });
+    }
+  } else if (kind === 'quad') {
+    state.charges = [
+      { x: cx - 110, y: cy - 90, q: 1 },
+      { x: cx + 110, y: cy - 90, q: -1 },
+      { x: cx - 110, y: cy + 90, q: -1 },
+      { x: cx + 110, y: cy + 90, q: 1 },
+    ];
+  }
+  markDirty();
+  seedParticles();
+}
+
+/* ============ 16. GUARDAR / CARGAR / EXPORTAR ============ */
+function serialize() {
+  return JSON.stringify({
+    version: 1,
+    charges: state.charges,
+    probe: state.probe,
+    probeSign: state.probeSign,
+  });
+}
+
+function deserialize(json) {
+  try {
+    const data = JSON.parse(json);
+    state.charges = Array.isArray(data.charges) ? data.charges : [];
+    state.probe = data.probe || null;
+    state.probeSign = data.probeSign || 1;
+    markDirty();
+    seedParticles();
+  } catch (err) {
+    console.warn('JSON inválido', err);
+  }
+}
+
+function saveToStorage() {
+  try { localStorage.setItem('electrofield_edu', serialize()); }
+  catch (e) { console.warn(e); }
+}
+
+function loadFromStorage() {
+  const raw = localStorage.getItem('electrofield_edu');
+  if (raw) deserialize(raw);
+}
+
+function exportScreenshot() {
+  const link = document.createElement('a');
+  link.download = 'electrofield_' + Date.now() + '.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function importFromFile() { dom.fileInput.click(); }
+
+dom.fileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => deserialize(reader.result);
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+/* ============ 17. EVENTOS UI ============ */
+dom.btnPos.onclick = () => setTool('pos');
+dom.btnNeg.onclick = () => setTool('neg');
+dom.btnProbe.onclick = () => setTool('probe');
+dom.btnDelete.onclick = () => setTool('delete');
+
+dom.qSlider.oninput = () => {
+  dom.qLabel.textContent = (+dom.qSlider.value).toFixed(1) + ' nC';
+};
+dom.densitySlider.oninput = () => {
+  state.density = +dom.densitySlider.value;
+  dom.densityLabel.textContent = state.density + ' px';
+  staticDirty = true;
+};
+dom.strengthSlider.oninput = () => {
+  state.strength = +dom.strengthSlider.value;
+  dom.strengthLabel.textContent = state.strength.toFixed(1) + '×';
+  staticDirty = true;
+};
+
+dom.toggleVectors.onchange   = e => { state.showVectors = e.target.checked; staticDirty = true; };
+dom.toggleFieldLines.onchange = e => { state.showFieldLines = e.target.checked; if (e.target.checked) state.fieldLines = null; staticDirty = true; };
+dom.togglePotential.onchange = e => { state.showPotential = e.target.checked; if (e.target.checked) state.potCache = null; staticDirty = true; };
+dom.toggleEqui.onchange      = e => { state.showEqui = e.target.checked; if (e.target.checked) state.potCache = null; staticDirty = true; };
+dom.toggleParticles.onchange = e => { state.showParticles = e.target.checked; };
+dom.toggleGrid.onchange      = e => { state.showGrid = e.target.checked; staticDirty = true; };
+
+dom.probePlus.onclick = () => {
+  state.probeSign = 1;
+  dom.probePlus.classList.add('active');
+  dom.probeMinus.classList.remove('active');
+};
+dom.probeMinus.onclick = () => {
+  state.probeSign = -1;
+  dom.probeMinus.classList.add('active');
+  dom.probePlus.classList.remove('active');
+};
+
+dom.btnDipole.onclick    = () => preset('dipole');
+dom.btnSame.onclick      = () => preset('same');
+dom.btnCapacitor.onclick = () => preset('capacitor');
+dom.btnQuad.onclick      = () => preset('quad');
+dom.btnClear.onclick     = () => {
+  state.charges = [];
+  state.probe = null;
+  markDirty();
+  seedParticles();
+};
+
+dom.pauseBtn.onclick = () => {
+  state.particlesPaused = !state.particlesPaused;
+  dom.pauseBtn.textContent = state.particlesPaused ? 'Reanudar' : 'Pausar';
+};
+
+dom.btnSave.onclick   = saveToStorage;
+dom.btnLoad.onclick   = loadFromStorage;
+dom.btnExport.onclick = exportScreenshot;
+dom.btnImport.onclick = importFromFile;
+
+dom.toggleGame.onchange = e => {
+  if (e.target.checked) startGame();
+  else {
+    state.game = false;
+    state.gameWon = false;
+    state.gameParticle = null;
+    state.gameTarget = null;
+    dom.gameHint.textContent = 'Lleva la partícula al objetivo colocando cargas.';
+  }
+};
+
+window.addEventListener('resize', scheduleResize);
+
+/* ============ 18. ATAJOS ============ */
+window.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  const k = e.key.toLowerCase();
+  if (k === 'p') setTool('pos');
+  else if (k === 'n') setTool('neg');
+  else if (k === 't') setTool('probe');
+  else if (k === 'delete' || k === 'backspace') setTool('delete');
+  else if (k === ' ') { e.preventDefault(); dom.pauseBtn.click(); }
+  else if (k === 's') saveToStorage();
+  else if (k === 'e') exportScreenshot();
+});
+
+/* ============ 19. INICIALIZACIÓN (diferida) ============ */
+function initApp() {
+  resize();
+  preset('dipole');
+  requestAnimationFrame(draw);
+}
+
+window.__initApp = initApp;
+
+})();
+
+/* ============================================================
+   ════════════════════════════════════════════════════════════
+   3. TRANSICIÓN INTRO → APP
+   ════════════════════════════════════════════════════════════
+   ============================================================ */
+(function(){
+  'use strict';
+
+  const btn   = document.getElementById('getStarted');
+  const intro = document.getElementById('intro');
+  const app   = document.getElementById('app');
+
+  let transitioned = false;
+
+  btn.addEventListener('click', function(){
+    if (transitioned) return;
+    transitioned = true;
+
+    // 1) Fade out del intro + fade in del app
+    intro.classList.add('hidden');
+    app.classList.add('visible');
+
+    // 2) Inicializa la app justo cuando empieza el fade in
+    setTimeout(function(){
+      if (typeof window.__initApp === 'function') {
+        window.__initApp();
+      }
+    }, 150);
+
+    // 3) Limpieza: quita el intro del DOM y detén su loop
+    setTimeout(function(){
+      if (intro) intro.style.display = 'none';
+      if (typeof window.__stopIntro === 'function') {
+        window.__stopIntro();
+      }
+    }, 1100);
+  });
+
+})();
+
+/* ============================================================
+   ════════════════════════════════════════════════════════════
+   4. SONIDO DE CLICK
+   ════════════════════════════════════════════════════════════
+   ============================================================ */
+(function(){
+  'use strict';
+
+  /* ── Configuración ───────────────────────────────────────── */
+  const SRC    = 'click.mp3';   // ruta del archivo de sonido
+  const POOL   = 4;             // nº de instancias para clics rápidos
+  const VOLUME = 0.55;          // 0.0 – 1.0
+
+  /* ── Pool de audios (evita cortes si clickeas muy seguido) ─ */
+  const pool = [];
+  let idx = 0;
+
+  function initPool(){
+    for (let i = 0; i < POOL; i++){
+      const a = new Audio(SRC);
+      a.preload = 'auto';
+      a.volume = VOLUME;
+      pool.push(a);
+    }
+  }
+
+  function playClick(){
+    if (!pool.length) return;
+    const a = pool[idx];
+    idx = (idx + 1) % POOL;
+    try {
+      a.currentTime = 0;
+      const p = a.play();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    } catch (e) { /* silencioso */ }
+  }
+
+  /* ── Delegación global de clicks ─────────────────────────── */
+  /* Detecta: <button>, elementos .btn, checkboxes de los toggles */
+  document.addEventListener('click', function(e){
+    if (!e.target || !e.target.closest) return;
+    const hit = e.target.closest(
+      'button, .btn, input[type="checkbox"]'
+    );
+    if (hit) playClick();
+  }, true);   // capture = true → suena antes que el handler del botón
+
+  /* ── Arranque ─────────────────────────────────────────────── */
+  initPool();
+
+})();
+</script>
+</body>
+</html>
